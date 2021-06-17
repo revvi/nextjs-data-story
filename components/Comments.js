@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { API } from 'aws-amplify';
 import { commentsByPostId } from '../src/graphql/queries';
 import { createComment } from '../src/graphql/mutations';
+import checkUser from '../helpers/checkUser';
 
 const initialState = { message: '' };
 
 export default function Comments({ postId }) {
   const [comments, updateComments] = useState([]);
   const [formState, updateFormState] = useState(initialState);
+  const user = checkUser();
   useEffect(() => {
     fetchComments();
   }, []);
