@@ -1,37 +1,32 @@
-import { withSSRContext } from 'aws-amplify'
+import { withSSRContext } from "aws-amplify";
 
-function Protected({ authenticated, username }) {
-  if (!authenticated) {
-    return <h1>Not authenticated</h1>
-  }
-  return <h1>Hello {username} from SSR route!</h1>
+function Protected({ username }) {
+  if (!username) return null;
+  return <h1>Hello {username} from SSR route!</h1>;
 }
 
+/*
+A more secure way is using SSR and server side redirects.
+*/
 export async function getServerSideProps({ req, res }) {
-  const { Auth } = withSSRContext({ req })
+  const { Auth } = withSSRContext({ req });
   try {
-    const user = await Auth.currentAuthenticatedUser()
-    console.log('user: ', user)
+    const user = await Auth.currentAuthenticatedUser();
     return {
       props: {
         authenticated: true,
-        username: user.username
-      }
-    }
+        username: user.username,
+      },
+    };
   } catch (err) {
-    console.log('error, user not authenticated')
-
-    // SSR redirect
-    res.writeHead(302, { Location: '/profile' });
-    res.end();
-    // non-SSR-redirect
-    // return {
-    //   props: {
-    //     authenticated: false
-    //   }
-    // }
+    /* This creates an error */
+    // res.writeHead(302, { Location: "/profile" });
+    // res.end();
+    /* This is workaround for above until fixed */
+    res.setHeader("Location", "/profile");
+    res.statusCode = 302;
   }
-  return {props: {}}
+  return { props: {} };
 }
 
-export default Protected
+export default Protected;
